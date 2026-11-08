@@ -1,1 +1,838 @@
-coba
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Bracket Turnamen Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a; /* Slate 900 */
+            color: #f8fafc; /* Slate 50 */
+            overflow: hidden;
+            height: 100vh;
+            display: flex;
+        }
+        
+        .bg-grid {
+            background-size: 40px 40px;
+            background-image: 
+                linear-gradient(to right, rgba(30, 41, 59, 0.5) 1px, transparent 1px), 
+                linear-gradient(to bottom, rgba(30, 41, 59, 0.5) 1px, transparent 1px);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #1e293b; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #475569; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #64748b; 
+        }
+
+        /* Remove arrows from number input */
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type="number"] {
+            -moz-appearance: textfield;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Role Selection Overlay -->
+    <div id="roleSelection" class="fixed inset-0 bg-slate-900 z-[100] flex flex-col items-center justify-center">
+        <div class="bg-white p-3 rounded-xl shadow-2xl mb-6 flex items-center justify-center gap-6">
+            <img src="KORPRI Logo - Colored - zonalogo.com_3.svg" alt="Logo KORPRI Resmi" onerror="this.style.display='none'" class="w-24 h-24 sm:w-32 sm:h-32 object-contain">
+            <img src="Picture1_4.jpg" alt="Logo HUT KORPRI" onerror="this.onerror=null; this.src='https://placehold.co/128x128/ffffff/1e40af?text=KORPRI';" class="w-24 h-24 sm:w-32 sm:h-32 object-contain rounded-lg">
+        </div>
+        <h1 class="text-3xl font-bold text-white mb-2 text-center px-4 tracking-wide drop-shadow-md">HUT KORPRI KABUPATEN TEGAL KE 55 TAHUN 2026</h1>
+        <h2 class="text-xl text-blue-400 mb-10 text-center px-4 font-semibold tracking-wider">CABANG OLAHRAGA TENIS MEJA</h2>
+        
+        <div class="flex flex-col sm:flex-row gap-4 w-full max-w-md px-6">
+            <button onclick="selectRole('visitor')" class="flex-1 px-6 py-4 bg-slate-800 hover:bg-slate-700 border border-slate-600 text-white rounded-xl font-medium transition-all shadow-lg flex flex-col items-center gap-2">
+                <svg class="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                <span>Masuk Pengunjung</span>
+                <span class="text-xs text-slate-400 font-normal">Hanya Lihat Bagan</span>
+            </button>
+            <button onclick="attemptAdminLogin()" class="flex-1 px-6 py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-medium transition-all shadow-lg shadow-blue-900/50 flex flex-col items-center gap-2">
+                <svg class="w-6 h-6 text-blue-200" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                <span>Masuk Admin</span>
+                <span class="text-xs text-blue-200 font-normal">Kelola Turnamen</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Password Modal -->
+    <div id="passwordModal" class="fixed inset-0 bg-slate-900/90 z-[110] hidden flex flex-col items-center justify-center backdrop-blur-sm">
+        <div class="bg-slate-800 p-6 rounded-xl shadow-2xl border border-slate-700 w-full max-w-sm">
+            <h3 class="text-xl font-bold text-white mb-4">Autentikasi Admin</h3>
+            <input type="password" id="adminPassword" class="w-full bg-slate-900 border border-slate-600 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-blue-500 outline-none mb-4" placeholder="Masukkan Password" onkeydown="if(event.key === 'Enter') verifyPassword()">
+            <div class="flex justify-end gap-3">
+                <button onclick="closePasswordModal()" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors">Batal</button>
+                <button onclick="verifyPassword()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors">Masuk</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="fixed top-4 right-4 px-6 py-3 rounded-lg shadow-lg text-white transition-opacity duration-300 z-50 opacity-0 pointer-events-none transform translate-y-0"></div>
+
+    <!-- Sidebar Configuration -->
+    <div id="adminSidebar" class="w-80 bg-slate-900 border-r border-slate-800 hidden flex-col h-full shadow-xl z-20 transition-all duration-300">
+        <div class="p-6 border-b border-slate-800">
+            <h1 class="text-xl font-bold text-white flex items-center gap-2">
+                <svg class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 002-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                Bracket Admin
+            </h1>
+            <p class="text-xs text-slate-400 mt-2">Sistem Best of 5 (Max Skor: 3)<br/><span class="text-amber-500">Klik 2x pemenang untuk batal (Undo).</span></p>
+        </div>
+        
+        <div class="p-6 flex-1 flex flex-col gap-4 overflow-y-auto">
+            <div>
+                <label class="block text-sm font-medium text-slate-300 mb-2">Daftar Peserta <span class="text-amber-400 text-xs">(Akhiri nama dgn * untuk Unggulan/Seeded)</span></label>
+                <textarea id="playerInput" class="w-full h-64 bg-slate-800 border border-slate-700 rounded-lg p-3 text-sm text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none resize-none placeholder-slate-500" placeholder="Unggulan 1 *&#10;Unggulan 2 *&#10;Pemain Biasa 1&#10;Pemain Biasa 2..."></textarea>
+                <div class="text-xs text-slate-400 mt-2 flex justify-between">
+                    <span id="playerCount">0 Peserta</span>
+                    <span>Min 2, Maks 64</span>
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-3 mt-4">
+                <button onclick="handleGenerate(true)" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 rounded-lg transition-colors flex justify-center items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                    Acak & Buat Bracket
+                </button>
+                <button onclick="handleGenerate(false)" class="w-full bg-slate-700 hover:bg-slate-600 text-white font-medium py-2.5 rounded-lg transition-colors">
+                    Buat Sesuai Urutan
+                </button>
+            </div>
+
+            <!-- Tombol Reset Tambahan -->
+            <div class="flex gap-3 mt-2">
+                <button onclick="resetBagan()" class="flex-1 bg-amber-900/40 hover:bg-amber-800 text-amber-400 border border-amber-700/50 font-medium py-2 rounded-lg text-xs transition-colors flex justify-center items-center gap-1.5 shadow-lg">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                    Reset Bagan
+                </button>
+                <button onclick="resetPeserta()" class="flex-1 bg-red-900/40 hover:bg-red-800 text-red-400 border border-red-700/50 font-medium py-2 rounded-lg text-xs transition-colors flex justify-center items-center gap-1.5 shadow-lg">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                    Reset Peserta
+                </button>
+            </div>
+            
+            <div id="statsBox" class="mt-4 bg-slate-800/50 border border-slate-700 rounded-lg p-4 hidden">
+                <h3 class="text-sm font-semibold text-slate-300 mb-2">Statistik Turnamen</h3>
+                <ul class="text-xs text-slate-400 space-y-1">
+                    <li class="flex justify-between"><span>Jumlah Peserta:</span> <span id="statPlayers" class="font-medium text-white"></span></li>
+                    <li class="flex justify-between"><span>Ukuran Slot:</span> <span id="statSlots" class="font-medium text-white"></span></li>
+                    <li class="flex justify-between"><span>Peserta BYE:</span> <span id="statByes" class="font-medium text-emerald-400"></span></li>
+                    <li class="flex justify-between mt-2 pt-2 border-t border-slate-700"><span>Total Pertandingan:</span> <span id="statMatches" class="font-bold text-blue-400"></span></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Bracket Area -->
+    <div class="flex-1 bg-grid relative flex flex-col overflow-hidden">
+        
+        <!-- Header Event -->
+        <div class="px-8 py-4 bg-slate-900/80 backdrop-blur-md border-b border-slate-800 flex items-center gap-5 z-10 flex-shrink-0 shadow-lg">
+            <div class="bg-white p-1.5 rounded-lg shadow-inner flex-shrink-0 flex gap-2">
+                <img src="KORPRI Logo - Colored - zonalogo.com_3.svg" alt="Logo KORPRI Resmi" onerror="this.style.display='none'" class="w-12 h-12 object-contain">
+                <img src="Picture1_4.jpg" alt="Logo HUT KORPRI" onerror="this.onerror=null; this.src='https://placehold.co/128x128/ffffff/1e40af?text=KORPRI';" class="w-12 h-12 object-contain">
+            </div>
+            <div>
+                <h2 class="text-xl md:text-2xl font-bold text-white tracking-wide">HUT KORPRI KABUPATEN TEGAL KE 55 TAHUN 2026</h2>
+                <p class="text-blue-400 font-medium text-sm md:text-base mt-1 flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                    Cabang Olahraga Tenis Meja
+                    <span class="bg-blue-900/50 text-blue-300 px-2 py-0.5 rounded text-xs ml-2 border border-blue-700/50">Best of 5</span>
+                </p>
+            </div>
+            <div class="ml-auto flex items-center gap-3">
+                <button onclick="downloadPDF()" class="text-sm px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg transition-colors border border-emerald-500 shadow-lg flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+                    Download PDF
+                </button>
+                 <button onclick="showRoleSelection()" class="text-sm px-4 py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white rounded-lg transition-colors border border-slate-700 flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"></path></svg>
+                    Ganti Peran
+                </button>
+            </div>
+        </div>
+
+        <div class="flex-1 overflow-auto relative">
+            <div id="exportArea" class="p-10 min-w-max flex flex-col items-start bg-[#0f172a] h-max min-h-full">
+                <!-- Header for PDF Export -->
+                <div id="pdfHeader" class="hidden flex-col items-center justify-center gap-4 mb-10 w-full border-b border-slate-700 pb-6 shrink-0">
+                    <div class="bg-white p-3 rounded-xl shadow-lg flex gap-6">
+                        <img src="KORPRI Logo - Colored - zonalogo.com_3.svg" alt="Logo KORPRI Resmi" onerror="this.style.display='none'" class="w-24 h-24 object-contain">
+                        <img src="Picture1_4.jpg" alt="Logo HUT KORPRI" onerror="this.onerror=null; this.src='https://placehold.co/128x128/ffffff/1e40af?text=KORPRI';" class="w-24 h-24 object-contain">
+                    </div>
+                    <div class="text-center">
+                        <h1 class="text-3xl font-bold text-white tracking-wide mb-2">HUT KORPRI KABUPATEN TEGAL KE 55 TAHUN 2026</h1>
+                        <h2 class="text-xl text-blue-400 font-medium">Bagan Pertandingan Cabang Olahraga Tenis Meja</h2>
+                    </div>
+                </div>
+
+                <div id="bracketContainer" class="flex gap-0 items-stretch w-full">
+                    <!-- Bracket will be rendered here -->
+                    <div class="h-full w-full flex items-center justify-center text-slate-500 font-medium">
+                        Memuat sistem turnamen...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data State
+        let tournamentBracket = [];
+        let totalRounds = 0;
+        let isAdmin = false;
+
+        // Admin Auth
+        function attemptAdminLogin() {
+            document.getElementById('passwordModal').classList.remove('hidden');
+            const pwdInput = document.getElementById('adminPassword');
+            pwdInput.value = '';
+            pwdInput.focus();
+        }
+
+        function closePasswordModal() {
+            document.getElementById('passwordModal').classList.add('hidden');
+        }
+
+        function verifyPassword() {
+            const pwd = document.getElementById('adminPassword').value;
+            if (pwd === 'admin123') {
+                closePasswordModal();
+                selectRole('admin');
+                showToast('Berhasil masuk sebagai Admin', 'success');
+            } else {
+                showToast('Password salah! Coba lagi.', 'error');
+            }
+        }
+
+        // Role Management
+        function selectRole(role) {
+            isAdmin = role === 'admin';
+            document.getElementById('roleSelection').classList.add('hidden');
+            
+            const sidebar = document.getElementById('adminSidebar');
+            if (isAdmin) {
+                sidebar.classList.remove('hidden');
+                sidebar.classList.add('flex');
+            } else {
+                sidebar.classList.add('hidden');
+                sidebar.classList.remove('flex');
+            }
+            
+            refreshBracketView();
+        }
+
+        function showRoleSelection() {
+            document.getElementById('roleSelection').classList.remove('hidden');
+        }
+
+        function refreshBracketView() {
+            if (tournamentBracket.length > 0) {
+                renderBracket();
+            } else if (!isAdmin) {
+                document.getElementById('bracketContainer').innerHTML = `
+                    <div class="h-full w-full flex items-center justify-center text-slate-500 font-medium text-center flex-col gap-3">
+                        <svg class="w-16 h-16 text-slate-700 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        <p class="text-lg">Belum ada bagan turnamen yang tersedia.</p>
+                        <p class="text-sm text-slate-600">Admin sedang mengonfigurasi pertandingan...</p>
+                    </div>
+                `;
+            } else {
+                document.getElementById('bracketContainer').innerHTML = `
+                    <div class="h-full w-full flex items-center justify-center text-slate-500 font-medium text-center flex-col gap-2">
+                        Masukkan daftar pemain di panel kiri dan buat bracket untuk memulai.
+                    </div>
+                `;
+            }
+        }
+
+        // UI Helpers
+        function showToast(message, type = 'error') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = `fixed top-4 right-4 px-6 py-3 rounded-lg shadow-xl text-sm font-medium transition-all duration-300 z-50 transform translate-y-0 ${
+                type === 'error' ? 'bg-red-900 border border-red-700 text-red-100' : 'bg-emerald-900 border border-emerald-700 text-emerald-100'
+            }`;
+            setTimeout(() => {
+                toast.classList.add('opacity-0', '-translate-y-4');
+            }, 3000);
+        }
+
+        document.getElementById('playerInput').addEventListener('input', function() {
+            const lines = this.value.split('\n').filter(p => p.trim() !== '');
+            document.getElementById('playerCount').textContent = `${lines.length} Peserta`;
+        });
+
+        // Helper untuk Mengacak Array
+        function shuffleArray(arr) {
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
+
+        // Fitur Reset
+        function resetBagan() {
+            if (tournamentBracket.length === 0) return showToast("Tidak ada bagan yang bisa direset.", "error");
+            
+            // Bersihkan semua skor dan pemenang
+            for (let r = 0; r < totalRounds; r++) {
+                for (let m = 0; m < tournamentBracket[r].length; m++) {
+                    let match = tournamentBracket[r][m];
+                    match.winner = null;
+                    match.score1 = '';
+                    match.score2 = '';
+                    // Bersihkan slot pemain di babak lanjutan
+                    if (r > 0) {
+                        match.p1 = null;
+                        match.p2 = null;
+                    }
+                }
+            }
+
+            // Evaluasi ulang pemain yang mendapat BYE dari ronde 1 (round 0)
+            for (let m = 0; m < tournamentBracket[0].length; m++) {
+                let match = tournamentBracket[0][m];
+                if (match.isBye) {
+                    match.winner = match.p1 || match.p2;
+                    if (match.nextMatch) {
+                        let nextM = tournamentBracket[match.nextMatch.r][match.nextMatch.m];
+                        if (match.nextMatch.slot === 0) nextM.p1 = match.winner;
+                        else nextM.p2 = match.winner;
+                    }
+                }
+            }
+
+            renderBracket();
+            showToast("Progres pertandingan berhasil direset!", "success");
+        }
+
+        function resetPeserta() {
+            document.getElementById('playerInput').value = '';
+            document.getElementById('playerCount').textContent = '0 Peserta';
+            document.getElementById('statsBox').classList.add('hidden');
+            
+            tournamentBracket = [];
+            totalRounds = 0;
+            
+            refreshBracketView();
+            showToast("Daftar peserta dan bagan telah dibersihkan.", "success");
+        }
+
+        // Download PDF
+        function downloadPDF() {
+            if (tournamentBracket.length === 0) {
+                return showToast('Belum ada bagan yang bisa di-download!', 'error');
+            }
+            showToast('Menyiapkan file PDF resolusi tinggi...', 'success');
+            
+            const pdfHeader = document.getElementById('pdfHeader');
+            pdfHeader.classList.remove('hidden');
+            pdfHeader.classList.add('flex');
+            
+            const element = document.getElementById('exportArea');
+
+            // Kalkulasi ukuran area secara dinamis agar bagan tidak terpotong
+            const elementWidth = element.scrollWidth;
+            const elementHeight = element.scrollHeight;
+
+            const opt = {
+                margin:       [40, 40, 40, 40], // Margin diperbesar agar nyaman dilihat
+                filename:     'Bracket_Tenis_Meja_KORPRI_55.pdf',
+                image:        { type: 'jpeg', quality: 1 },
+                html2canvas:  { 
+                    scale: 3, // Ditingkatkan ke 3x untuk hasil cetak HD (sangat tajam)
+                    backgroundColor: '#0f172a', // Background gelap untuk PDF
+                    scrollY: 0, 
+                    scrollX: 0,
+                    windowWidth: elementWidth,
+                    windowHeight: elementHeight,
+                    useCORS: true // Memaksa browser memuat logo ke dalam kanvas PDF
+                },
+                jsPDF:        { 
+                    unit: 'px', 
+                    format: [elementWidth + 80, elementHeight + 80], // Set resolusi mutlak menyesuaikan ukuran bagan
+                    orientation: elementWidth > elementHeight ? 'landscape' : 'portrait' // Dinamis mengikuti proporsi bagan
+                }
+            };
+
+            // Beri jeda sedikit agar layout menyesuaikan sebelum mengambil gambar
+            setTimeout(() => {
+                html2pdf().set(opt).from(element).save().then(() => {
+                    pdfHeader.classList.add('hidden');
+                    pdfHeader.classList.remove('flex');
+                    showToast('Bagan berhasil didownload.', 'success');
+                }).catch(err => {
+                    pdfHeader.classList.add('hidden');
+                    pdfHeader.classList.remove('flex');
+                    showToast('Gagal memproses PDF', 'error');
+                });
+            }, 500);
+        }
+
+        // Tournament Logic
+        function getSeeding(slots) {
+            let rounds = Math.log2(slots);
+            let pls = [1, 2];
+            for (let i = 1; i < rounds; i++) {
+                let nextR = [];
+                let length = pls.length * 2 + 1;
+                for (let j = 0; j < pls.length; j++) {
+                    nextR.push(pls[j]);
+                    nextR.push(length - pls[j]);
+                }
+                pls = nextR;
+            }
+            return pls;
+        }
+
+        function getRoundName(matchesInRound, isFinal) {
+            if (isFinal) return "Final";
+            if (matchesInRound === 2) return "Semifinal";
+            if (matchesInRound === 4) return "Perempat Final";
+            return `Babak ${matchesInRound * 2} Besar`;
+        }
+
+        function handleGenerate(shuffle) {
+            const rawText = document.getElementById('playerInput').value;
+            let rawParticipants = rawText.split('\n').map(p => p.trim()).filter(p => p !== '');
+
+            // Validations
+            if (rawParticipants.length < 2) {
+                return showToast("Minimal 2 peserta dibutuhkan.");
+            }
+            if (rawParticipants.length > 64) {
+                return showToast("Maksimal 64 peserta. Hapus beberapa pemain.");
+            }
+            
+            let seeded = [];
+            let unseeded = [];
+            let uniqueCheck = new Set();
+            let duplicateFound = false;
+
+            // Pisahkan pemain Unggulan (Seeded) dan Biasa
+            rawParticipants.forEach(p => {
+                let isSeeded = p.endsWith('*');
+                let cleanName = isSeeded ? p.replace(/\*$/, '').trim() : p;
+                
+                if (uniqueCheck.has(cleanName)) {
+                    duplicateFound = true;
+                }
+                uniqueCheck.add(cleanName);
+                
+                if (isSeeded) seeded.push(cleanName);
+                else unseeded.push(cleanName);
+            });
+
+            if (duplicateFound) {
+                return showToast("Ditemukan nama peserta yang ganda. Pastikan semua nama unik.");
+            }
+
+            if (shuffle) {
+                // Acak masing-masing grup secara terpisah
+                seeded = shuffleArray(seeded);
+                unseeded = shuffleArray(unseeded);
+            }
+
+            // Gabungkan: Seeded akan menempati urutan seed tertinggi (tersebar simetris)
+            let participants = [...seeded, ...unseeded];
+
+            generateBracket(participants);
+            showToast("Bracket berhasil dibuat!", "success");
+        }
+
+        function generateBracket(participants) {
+            const N = participants.length;
+            const slots = Math.pow(2, Math.ceil(Math.log2(N)));
+            totalRounds = Math.log2(slots);
+            tournamentBracket = [];
+
+            // 1. Inisialisasi Struktur Bracket Kosong
+            for (let r = 0; r < totalRounds; r++) {
+                let matchesInRound = slots / Math.pow(2, r + 1);
+                let round = [];
+                for (let m = 0; m < matchesInRound; m++) {
+                    round.push({
+                        id: `r${r}-m${m}`,
+                        r: r,
+                        m: m,
+                        p1: null,
+                        p2: null,
+                        score1: '',
+                        score2: '',
+                        winner: null,
+                        isBye: false,
+                        nextMatch: (r < totalRounds - 1) ? { r: r + 1, m: Math.floor(m / 2), slot: m % 2 } : null
+                    });
+                }
+                tournamentBracket.push(round);
+            }
+
+            // 2. Terapkan Seeding Standard untuk Distribusi BYE
+            const seeds = getSeeding(slots);
+            for (let m = 0; m < tournamentBracket[0].length; m++) {
+                let seed1 = seeds[2 * m];
+                let seed2 = seeds[2 * m + 1];
+
+                let p1 = seed1 <= N ? participants[seed1 - 1] : null;
+                let p2 = seed2 <= N ? participants[seed2 - 1] : null;
+
+                let match = tournamentBracket[0][m];
+                match.p1 = p1;
+                match.p2 = p2;
+
+                // Cek BYE otomatis
+                if (p1 === null || p2 === null) {
+                    match.isBye = true;
+                    match.winner = p1 || p2;
+                    // Langsung dorong ke babak selanjutnya
+                    if (match.nextMatch) {
+                        let nextM = tournamentBracket[match.nextMatch.r][match.nextMatch.m];
+                        if (match.nextMatch.slot === 0) nextM.p1 = match.winner;
+                        else nextM.p2 = match.winner;
+                    }
+                }
+            }
+
+            updateStats(N, slots);
+            renderBracket();
+        }
+
+        function updateStats(players, slots) {
+            const byes = slots - players;
+            const realMatches = players - 1; // Validasi wajib: pertandingan = N - 1
+            
+            document.getElementById('statPlayers').textContent = players;
+            document.getElementById('statSlots').textContent = slots;
+            document.getElementById('statByes').textContent = byes;
+            document.getElementById('statMatches').textContent = realMatches;
+            document.getElementById('statsBox').classList.remove('hidden');
+        }
+
+        function setWinner(r, m, slot) {
+            if (!isAdmin) return; // Guard for visitors
+            let match = tournamentBracket[r][m];
+            if (match.isBye) return;
+
+            let clickedPlayer = slot === 0 ? match.p1 : match.p2;
+            let oldWinner = match.winner;
+
+            if (!clickedPlayer) return; 
+
+            // Fitur Undo / Batal: Jika mengklik pemain yang sudah menang, maka batalkan kemenangannya
+            if (clickedPlayer === oldWinner) {
+                match.winner = null;
+                if (match.nextMatch) {
+                    clearWinnerRecursively(match.nextMatch.r, match.nextMatch.m, oldWinner);
+                }
+                renderBracket();
+                return;
+            }
+
+            match.winner = clickedPlayer;
+
+            if (match.nextMatch) {
+                let nextR = match.nextMatch.r;
+                let nextM = match.nextMatch.m;
+                let nextSlot = match.nextMatch.slot;
+
+                // Jika sudah ada pemenang sebelumnya, bersihkan data mereka dari babak-babak selanjutnya
+                if (oldWinner) {
+                    clearWinnerRecursively(nextR, nextM, oldWinner);
+                }
+
+                // Masukkan pemenang baru
+                let nextMatchObj = tournamentBracket[nextR][nextM];
+                if (nextSlot === 0) nextMatchObj.p1 = clickedPlayer;
+                else nextMatchObj.p2 = clickedPlayer;
+            }
+            renderBracket();
+        }
+
+        function setScore(r, m, slot, value) {
+            let match = tournamentBracket[r][m];
+            if (slot === 0) match.score1 = value;
+            else match.score2 = value;
+        }
+
+        function clearWinnerRecursively(r, m, nameToClear) {
+            let match = tournamentBracket[r][m];
+            let changed = false;
+
+            if (match.p1 === nameToClear) { match.p1 = null; changed = true; }
+            if (match.p2 === nameToClear) { match.p2 = null; changed = true; }
+            if (match.winner === nameToClear) { match.winner = null; changed = true; }
+
+            if (changed && match.nextMatch) {
+                clearWinnerRecursively(match.nextMatch.r, match.nextMatch.m, nameToClear);
+            }
+        }
+
+        function editPlayerName(oldName, inputElement) {
+            const newName = inputElement.value.trim();
+            if (!newName || newName === oldName) {
+                inputElement.value = oldName;
+                return;
+            }
+
+            const textarea = document.getElementById('playerInput');
+            let lines = textarea.value.split('\n');
+            let namesOnly = lines.map(l => {
+                let cleanL = l.trim();
+                return cleanL.endsWith('*') ? cleanL.replace(/\*$/, '').trim() : cleanL;
+            });
+            
+            if (namesOnly.includes(newName)) {
+                showToast('Nama peserta sudah ada, gunakan nama lain.', 'error');
+                inputElement.value = oldName;
+                return;
+            }
+
+            // Update in bracket
+            for (let r = 0; r < totalRounds; r++) {
+                for (let m = 0; m < tournamentBracket[r].length; m++) {
+                    let match = tournamentBracket[r][m];
+                    if (match.p1 === oldName) match.p1 = newName;
+                    if (match.p2 === oldName) match.p2 = newName;
+                    if (match.winner === oldName) match.winner = newName;
+                }
+            }
+
+            // Update textarea list (Pertahankan tanda bintang jika sebelumnya unggulan)
+            let lineIdx = -1;
+            for(let i=0; i<lines.length; i++) {
+                let cleanL = lines[i].trim();
+                let isSeed = cleanL.endsWith('*');
+                let coreName = isSeed ? cleanL.replace(/\*$/, '').trim() : cleanL;
+                
+                if(coreName === oldName) {
+                    lines[i] = isSeed ? newName + ' *' : newName;
+                    lineIdx = i;
+                    break;
+                }
+            }
+
+            if (lineIdx !== -1) {
+                textarea.value = lines.join('\n');
+            }
+
+            renderBracket();
+            showToast('Nama peserta diperbarui', 'success');
+        }
+
+        // Render Engine
+        function renderBracket() {
+            const container = document.getElementById('bracketContainer');
+            let html = '';
+
+            let playerNums = {};
+            let firstVisible = {};
+
+            if (totalRounds > 0) {
+                // 1. Tentukan nomor urut peserta (1 s/d N) dari atas ke bawah berdasarkan slot awal
+                let currentNum = 1;
+                for (let m = 0; m < tournamentBracket[0].length; m++) {
+                    let match = tournamentBracket[0][m];
+                    if (match.p1 !== null) playerNums[match.p1] = currentNum++;
+                    if (match.p2 !== null) playerNums[match.p2] = currentNum++;
+                }
+
+                // 2. Cari di mana babak pertama (awal) peserta tersebut muncul secara visual (Bukan BYE)
+                for (let r = 0; r < totalRounds; r++) {
+                    for (let m = 0; m < tournamentBracket[r].length; m++) {
+                        let match = tournamentBracket[r][m];
+                        if (!match.isBye) {
+                            if (match.p1 && !firstVisible[match.p1]) firstVisible[match.p1] = `${r}-${m}-0`;
+                            if (match.p2 && !firstVisible[match.p2]) firstVisible[match.p2] = `${r}-${m}-1`;
+                        }
+                    }
+                }
+            }
+
+            for (let r = 0; r < totalRounds; r++) {
+                const roundMatches = tournamentBracket[r];
+                const isFinal = r === totalRounds - 1;
+
+                // Render Column untuk Pertandingan (Diperlebar menjadi w-96 untuk nama panjang ekstra)
+                html += `<div class="flex flex-col relative w-96 flex-shrink-0">`;
+                html += `<div class="absolute -top-6 w-full text-center text-sm font-bold uppercase tracking-wider text-slate-400">${getRoundName(roundMatches.length, isFinal)}</div>`;
+                
+                roundMatches.forEach(match => {
+                    html += renderMatchCard(match, playerNums, firstVisible);
+                });
+                
+                html += `</div>`;
+
+                // Render Column untuk Garis Penghubung (Connector)
+                if (!isFinal) {
+                    html += `<div class="flex flex-col w-10 flex-shrink-0 relative">`;
+                    const nextRoundMatches = tournamentBracket[r + 1].length;
+                    for (let c = 0; c < nextRoundMatches; c++) {
+                        let matchTop = tournamentBracket[r][2 * c];
+                        let matchBot = tournamentBracket[r][2 * c + 1];
+                        html += renderConnector(matchTop.isBye, matchBot.isBye);
+                    }
+                    html += `</div>`;
+                }
+            }
+
+            // Render Final Winner Column
+            if (totalRounds > 0) {
+                let finalMatch = tournamentBracket[totalRounds - 1][0];
+                html += `<div class="flex flex-col w-8 flex-shrink-0 relative">`;
+                html += renderFinalConnector();
+                html += `</div>`;
+                
+                // Diperlebar menjadi w-96 untuk nama panjang ekstra
+                html += `<div class="flex flex-col justify-center relative w-96 flex-shrink-0">`;
+                html += `<div class="absolute top-10 w-full text-center text-sm font-bold uppercase tracking-wider text-amber-500 shadow-amber-500 drop-shadow-md">JUARA</div>`;
+                html += renderChampionCard(finalMatch.winner);
+                html += `</div>`;
+            }
+
+            container.innerHTML = html;
+        }
+
+        function renderMatchCard(match, playerNums, firstVisible) {
+            // Hilangkan kotak sepenuhnya jika ini adalah BYE
+            if (match.isBye) {
+                return `
+                <div class="flex-1 flex flex-col justify-center p-2 relative invisible">
+                    <div class="h-[74px]"></div>
+                </div>`;
+            }
+
+            let isP1Winner = match.winner && match.winner === match.p1;
+            let isP2Winner = match.winner && match.winner === match.p2;
+
+            // Update UI variables
+            const bgContainer = 'bg-slate-800 border-slate-600 shadow-lg';
+            const bgHover = isAdmin ? 'hover:bg-slate-700' : '';
+            
+            const p1BgWin = isP1Winner ? 'bg-blue-900/40 border-l-4 border-blue-500 text-blue-300 font-semibold' : 'text-slate-300 border-l-4 border-transparent';
+            
+            const p2BgWin = isP2Winner ? 'bg-blue-900/40 border-l-4 border-blue-500 text-blue-300 font-semibold' : 'text-slate-300 border-l-4 border-transparent';
+            
+            const inputClass = 'bg-slate-900 border-slate-600 text-white';
+            const scoreValText = 'text-blue-400';
+            const scoreEmptyText = 'text-slate-600';
+            const divLine = 'bg-slate-700';
+
+            // Logika memunculkan penomoran hanya pada pertandingan pertama kali peserta terlihat
+            let showP1Num = match.p1 && firstVisible[match.p1] === `${match.r}-${match.m}-0`;
+            let p1NumBadge = showP1Num ? `<span class="inline-flex items-center justify-center w-5 h-5 rounded bg-slate-700 text-slate-300 text-[10px] font-bold mr-2 flex-shrink-0">${playerNums[match.p1]}</span>` : '';
+            
+            let showP2Num = match.p2 && firstVisible[match.p2] === `${match.r}-${match.m}-1`;
+            let p2NumBadge = showP2Num ? `<span class="inline-flex items-center justify-center w-5 h-5 rounded bg-slate-700 text-slate-300 text-[10px] font-bold mr-2 flex-shrink-0">${playerNums[match.p2]}</span>` : '';
+
+            // Memperlebar input nama dan menyisipkan badge nomor
+            const p1NameUI = (isAdmin && !match.isBye && match.p1)
+                ? `<div class="flex items-center flex-1 min-w-0 mr-2">${p1NumBadge}<input type="text" data-oldname="${match.p1.replace(/"/g, '&quot;')}" class="flex-1 w-full min-w-0 border rounded px-2 py-1 text-sm focus:ring-1 focus:ring-blue-500 outline-none truncate ${inputClass}" value="${match.p1.replace(/"/g, '&quot;')}" onchange="editPlayerName(this.getAttribute('data-oldname'), this)" onclick="event.stopPropagation()"></div>`
+                : `<div class="flex items-center flex-1 min-w-0 pr-2 pointer-events-none">${p1NumBadge}<span class="truncate text-sm font-medium flex-1">${match.p1 || `<span class="text-xs italic font-normal text-slate-500">Menunggu...</span>`}</span></div>`;
+
+            const p2NameUI = (isAdmin && !match.isBye && match.p2)
+                ? `<div class="flex items-center flex-1 min-w-0 mr-2">${p2NumBadge}<input type="text" data-oldname="${match.p2.replace(/"/g, '&quot;')}" class="flex-1 w-full min-w-0 border rounded px-2 py-1 text-sm focus:ring-1 focus:ring-blue-500 outline-none truncate ${inputClass}" value="${match.p2.replace(/"/g, '&quot;')}" onchange="editPlayerName(this.getAttribute('data-oldname'), this)" onclick="event.stopPropagation()"></div>`
+                : `<div class="flex items-center flex-1 min-w-0 pr-2 pointer-events-none">${p2NumBadge}<span class="truncate text-sm font-medium flex-1">${match.p2 || `<span class="text-xs italic font-normal text-slate-500">Menunggu...</span>`}</span></div>`;
+
+            // UI Input Skor berdasarkan Role (Text Input Bebas)
+            const p1ScoreUI = isAdmin 
+                ? (match.p1 ? `<input type="text" class="w-12 border rounded text-center text-xs h-7 focus:ring-1 focus:ring-blue-500 outline-none flex-shrink-0 ${inputClass}" placeholder="Skor" value="${match.score1}" onchange="setScore(${match.r}, ${match.m}, 0, this.value)" onclick="event.stopPropagation()">` : '')
+                : (match.p1 ? `<span class="text-sm font-bold w-12 text-center flex-shrink-0 ${match.score1 ? scoreValText : scoreEmptyText}">${match.score1 || '-'}</span>` : '');
+
+            const p2ScoreUI = isAdmin 
+                ? (match.p2 ? `<input type="text" class="w-12 border rounded text-center text-xs h-7 focus:ring-1 focus:ring-blue-500 outline-none flex-shrink-0 ${inputClass}" placeholder="Skor" value="${match.score2}" onchange="setScore(${match.r}, ${match.m}, 1, this.value)" onclick="event.stopPropagation()">` : '')
+                : (match.p2 ? `<span class="text-sm font-bold w-12 text-center flex-shrink-0 ${match.score2 ? scoreValText : scoreEmptyText}">${match.score2 || '-'}</span>` : '');
+
+            return `
+            <div class="flex-1 flex flex-col justify-center py-3 relative group">
+                <div class="flex flex-col rounded-lg border overflow-hidden w-full transition-transform transform ${isAdmin ? 'group-hover:scale-[1.02]' : ''} ${bgContainer}">
+                    <!-- Slot 1 -->
+                    <div class="flex-1 flex justify-between items-center px-3 py-2 transition-colors ${isAdmin ? 'cursor-pointer' : 'cursor-default'} ${bgHover} ${p1BgWin}" ${isAdmin ? `onclick="setWinner(${match.r}, ${match.m}, 0)"` : ''}>
+                        ${p1NameUI}
+                        ${p1ScoreUI}
+                    </div>
+                    
+                    <div class="h-px ${divLine}"></div>
+                    
+                    <!-- Slot 2 -->
+                    <div class="flex-1 flex justify-between items-center px-3 py-2 transition-colors ${isAdmin ? 'cursor-pointer' : 'cursor-default'} ${bgHover} ${p2BgWin}" ${isAdmin ? `onclick="setWinner(${match.r}, ${match.m}, 1)"` : ''}>
+                        ${p2NameUI}
+                        ${p2ScoreUI}
+                    </div>
+                </div>
+            </div>`;
+        }
+
+        function renderConnector(topIsBye, botIsBye) {
+            // Jika KEDUANYA BYE, jangan buat garis penghubung apapun ke ronde selanjutnya.
+            if (topIsBye && botIsBye) {
+                return `<div class="flex-1 relative min-h-[100px]"></div>`;
+            }
+
+            const lineColor = 'bg-slate-600';
+
+            return `
+            <div class="flex-1 relative min-h-[100px]">
+                <!-- Garis masuk dari atas (hidden jika BYE) -->
+                ${!topIsBye ? `<div class="absolute left-0 top-[25%] w-[50%] h-[2px] ${lineColor}"></div>` : ''}
+                
+                <!-- Garis masuk dari bawah (hidden jika BYE) -->
+                ${!botIsBye ? `<div class="absolute left-0 top-[75%] w-[50%] h-[2px] ${lineColor}"></div>` : ''}
+
+                <!-- Garis Vertikal penghubung (Menyesuaikan jika salah satu BYE) -->
+                <div class="absolute left-[50%] w-[2px] ${lineColor}" style="
+                    top: ${topIsBye ? '50%' : '25%'};
+                    bottom: ${botIsBye ? '50%' : '25%'};
+                "></div>
+
+                <!-- Garis Keluar ke babak selanjutnya -->
+                <div class="absolute left-[50%] top-[50%] w-[50%] h-[2px] ${lineColor}"></div>
+            </div>`;
+        }
+
+        function renderFinalConnector() {
+            const lineColor = 'bg-amber-600/50';
+            return `
+            <div class="flex-1 relative min-h-[100px]">
+                <div class="absolute left-0 top-[50%] w-full h-[2px] ${lineColor}"></div>
+            </div>`;
+        }
+
+        function renderChampionCard(winner) {
+            const bgClass = 'bg-gradient-to-r from-amber-900/60 to-amber-800/40 border-amber-500/50 shadow-[0_0_15px_rgba(245,158,11,0.2)]';
+            const textClass = 'text-amber-400';
+            const noneClass = 'text-amber-700/50';
+
+            return `
+            <div class="flex-1 flex flex-col justify-center py-3 relative">
+                <div class="flex flex-col rounded-lg border overflow-hidden w-full h-[52px] items-center justify-center px-4 backdrop-blur-sm ${bgClass}">
+                    <span class="font-bold text-lg truncate w-full text-center ${textClass}">${winner || `<span class="text-sm font-normal ${noneClass}">Belum Ditentukan</span>`}</span>
+                </div>
+            </div>`;
+        }
+    </script>
+</body>
+</html>
